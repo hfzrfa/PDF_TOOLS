@@ -1,0 +1,50 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging and build output
+build/
+build_fixed/
+dist/
+dist_fixed/
+*.egg-info/
+
+# PyInstaller temporary files
+*.manifest
+*.toc
+*.pkg
+
+# Test and tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+
+# Local OS/editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Generated conversion/compression outputs
+*_compressed.pdf
+*_compressed_out.pdf
+*_converted.pdf
+*_converted.docx
+*_converted.xlsx
+merged_images*.pdf
+
+# Temporary Office files
+~$*
