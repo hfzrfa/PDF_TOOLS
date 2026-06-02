@@ -1,8 +1,3 @@
-"""
-PDF Compressor  –  by hfzrfa
-Drag & Drop  ·  Custom output  ·  Multiple compression levels
-"""
-
 import os
 import sys
 import json
@@ -16,12 +11,12 @@ from tkinter import filedialog, messagebox
 import customtkinter as ctk
 
 try:
-    import fitz  # PyMuPDF
+    import fitz
 except ImportError:
     print("PyMuPDF not installed. Run: pip install PyMuPDF")
     sys.exit(1)
 
-# ── Drag-and-Drop ────────────────────────────────────────────────────
+
 DND_AVAILABLE = False
 try:
     from tkinterdnd2 import TkinterDnD, DND_FILES
@@ -36,7 +31,7 @@ except Exception:
     _RootBase = ctk.CTk
 
 
-# ── Helpers ──────────────────────────────────────────────────────────
+
 def fmt(size: int) -> str:
     if size < 1024:
         return f"{size} B"
@@ -54,7 +49,7 @@ def compress_single_pdf(input_path, output_path, quality="medium", callback=None
     jpeg_q = {"low": 25, "medium": 55, "high": 82}[quality]
     garbage = {"low": 4, "medium": 3, "high": 2}[quality]
 
-    # ── Try to recompress images (best-effort) ───────────────
+
     for idx in range(total_pages):
         if callback:
             callback(int((idx / total_pages) * 80),
@@ -70,7 +65,7 @@ def compress_single_pdf(input_path, output_path, quality="medium", callback=None
                     pix = fitz.Pixmap(doc, xref)
                     if pix.alpha or pix.width < 64 or pix.height < 64:
                         continue
-                    # Convert CMYK or other colorspaces to RGB
+
                     if pix.n > 3:
                         pix = fitz.Pixmap(fitz.csRGB, pix)
                     new_bytes = pix.tobytes("jpeg", jpg_quality=jpeg_q)
@@ -86,12 +81,12 @@ def compress_single_pdf(input_path, output_path, quality="medium", callback=None
     if callback:
         callback(90, "Saving...")
 
-    # ── Save with compatible parameters ──────────────────────
+
     try:
         try:
             doc.save(output_path, garbage=garbage, deflate=True, clean=True)
         except TypeError:
-            # Fallback for older PyMuPDF versions
+
             doc.save(output_path, garbage=garbage, deflate=True)
     finally:
         doc.close()
@@ -376,7 +371,7 @@ def merge_images_to_pdf(image_paths, output_path, callback=None):
         callback(100, "Done")
 
 
-# ── Colors ───────────────────────────────────────────────────────────
+
 C = {
     "bg":       "#2C3947",
     "surface":  "#34495e",
@@ -455,7 +450,7 @@ TOOL_CONFIGS = {
 }
 
 
-# ── Application ──────────────────────────────────────────────────────
+
 class PDFCompressorApp(_RootBase):
     def __init__(self):
         super().__init__()
@@ -565,12 +560,12 @@ class PDFCompressorApp(_RootBase):
     def _active_extensions(self):
         return self._tool_config()["extensions"]
 
-    # ────────────────────────────────────────────────────────────
-    #  UI
-    # ────────────────────────────────────────────────────────────
+
+
+
     def _build_ui(self):
 
-        # ── Header ───────────────────────────────────────────────
+
         header = ctk.CTkFrame(self, fg_color=C["surface"],
                               corner_radius=0, height=52)
         header.pack(fill="x")
@@ -588,7 +583,7 @@ class PDFCompressorApp(_RootBase):
             text_color=C["accent_h"],
         ).pack(side="right", padx=20)
 
-        # ── Scrollable body ──────────────────────────────────────
+
         body = ctk.CTkScrollableFrame(
             self, fg_color="transparent",
             scrollbar_button_color=C["accent"],
@@ -617,7 +612,7 @@ class PDFCompressorApp(_RootBase):
         self.tool_selector.pack(fill="x")
         self.tool_selector.set(TOOL_CONFIGS[self.active_tool]["label"])
 
-        # ── 1. Drop Zone ─────────────────────────────────────────
+
         self.drop_frame = ctk.CTkFrame(
             pad, fg_color=C["surface"], corner_radius=14,
             border_color=C["accent"], border_width=2, height=120)
@@ -647,7 +642,7 @@ class PDFCompressorApp(_RootBase):
         for w in (self.drop_frame, drop_inner, self.drop_label):
             w.bind("<Button-1>", lambda e: self._browse_files())
 
-        # ── 2. File List ─────────────────────────────────────────
+
         fh = ctk.CTkFrame(pad, fg_color="transparent", height=26)
         fh.pack(fill="x", pady=(14, 4))
         ctk.CTkLabel(fh, text="Files",
@@ -667,13 +662,13 @@ class PDFCompressorApp(_RootBase):
 
         self._show_empty_label()
 
-        # ── 3. Settings ──────────────────────────────────────────
+
         settings = ctk.CTkFrame(pad, fg_color=C["surface"],
                                 corner_radius=10,
                                 border_color=C["border"], border_width=1)
         settings.pack(fill="x", pady=(14, 0))
 
-        # output dir
+
         o_row = ctk.CTkFrame(settings, fg_color="transparent")
         o_row.pack(fill="x", padx=14, pady=(12, 0))
         ctk.CTkLabel(o_row, text="Output Folder",
@@ -697,7 +692,7 @@ class PDFCompressorApp(_RootBase):
             settings, fg_color=C["border"], height=1)
         self.quality_sep.pack(fill="x", padx=14)
 
-        # quality
+
         self.compression_row = ctk.CTkFrame(settings, fg_color="transparent")
         q_row = self.compression_row
         q_row.pack(fill="x", padx=14, pady=12)
@@ -717,7 +712,7 @@ class PDFCompressorApp(_RootBase):
                 border_color=C["text2"], text_color=C["text"],
             ).pack(side="left", padx=(12, 0))
 
-        # ── 4. Progress Section ──────────────────────────────────
+
         self.prog_card = ctk.CTkFrame(
             pad, fg_color=C["surface"], corner_radius=10,
             border_color=C["border"], border_width=1)
@@ -726,7 +721,7 @@ class PDFCompressorApp(_RootBase):
         prog_inner = ctk.CTkFrame(prog_card, fg_color="transparent")
         prog_inner.pack(fill="x", padx=14, pady=14)
 
-        # top row: label + percentage
+
         prog_top = ctk.CTkFrame(prog_inner, fg_color="transparent")
         prog_top.pack(fill="x", pady=(0, 6))
 
@@ -742,20 +737,20 @@ class PDFCompressorApp(_RootBase):
             text_color=C["accent"])
         self.pct_label.pack(side="right")
 
-        # progress bar
+
         self.progress_bar = ctk.CTkProgressBar(
             prog_inner, height=14, corner_radius=7,
             fg_color=C["surface2"], progress_color=C["accent"])
         self.progress_bar.pack(fill="x")
         self.progress_bar.set(0)
 
-        # status text
+
         self.status_lbl = ctk.CTkLabel(
             prog_inner, text="Waiting...", anchor="w",
             font=ctk.CTkFont("Segoe UI", 11), text_color=C["text2"])
         self.status_lbl.pack(fill="x", pady=(6, 0))
 
-        # ── 5. Action Buttons ────────────────────────────────────
+
         self.btn_row = ctk.CTkFrame(pad, fg_color="transparent")
         btn_row = self.btn_row
         btn_row.pack(fill="x", pady=(16, 0))
@@ -777,11 +772,11 @@ class PDFCompressorApp(_RootBase):
             command=self._start_compress)
         self.compress_btn.pack(side="right")
 
-        # ── 6. Results (hidden until compression finishes) ───────
+
         self._result_parent = pad
         self.result_frame = None
 
-        # ── Footer ───────────────────────────────────────────────
+
         footer = ctk.CTkFrame(self, fg_color=C["surface"],
                               corner_radius=0, height=30)
         footer.pack(fill="x", side="bottom")
@@ -792,9 +787,9 @@ class PDFCompressorApp(_RootBase):
             text_color=C["text2"],
         ).pack(expand=True)
 
-    # ────────────────────────────────────────────────────────────
-    #  Drag & Drop
-    # ────────────────────────────────────────────────────────────
+
+
+
     def _setup_dnd(self):
         if not DND_AVAILABLE:
             return
@@ -847,9 +842,9 @@ class PDFCompressorApp(_RootBase):
                 text=f"Added {added} file(s) via drag & drop")
         return event.action
 
-    # ────────────────────────────────────────────────────────────
-    #  File Operations
-    # ────────────────────────────────────────────────────────────
+
+
+
     def _browse_files(self):
         if self._is_compressing:
             return
@@ -945,9 +940,9 @@ class PDFCompressorApp(_RootBase):
                 command=lambda p=_fp: self._remove_file(p),
             ).pack(side="right", padx=4)
 
-    # ────────────────────────────────────────────────────────────
-    #  Compression
-    # ────────────────────────────────────────────────────────────
+
+
+
     def _make_output_path(self, input_path, tool_key):
         base = Path(input_path).stem
         if tool_key == "compress":
@@ -1209,7 +1204,7 @@ class PDFCompressorApp(_RootBase):
             progress_color=C["accent"]))
         return
 
-        # ── Build result panel ───────────────────────────────────
+
         if self.result_frame:
             self.result_frame.pack_forget()
 
@@ -1254,7 +1249,7 @@ class PDFCompressorApp(_RootBase):
                     font=ctk.CTkFont("Segoe UI", 11),
                     text_color=C["red"]).pack(side="left", padx=10)
 
-        # ── Summary row ──────────────────────────────────────────
+
         if total_orig > 0:
             saved = total_orig - total_comp
             saved_pct = (saved / total_orig) * 100
@@ -1284,7 +1279,7 @@ class PDFCompressorApp(_RootBase):
             ctk.CTkFrame(self.result_frame, fg_color="transparent",
                          height=8).pack()
 
-        # ── Status & notification popup ──────────────────────────
+
         if fail_n == 0:
             self.status_lbl.configure(text="✅  All files compressed!")
             self.progress_bar.configure(progress_color=C["green"])
@@ -1297,7 +1292,7 @@ class PDFCompressorApp(_RootBase):
         elif ok_n == 0:
             self.status_lbl.configure(text="❌  All files failed!")
             self.progress_bar.configure(progress_color=C["red"])
-            # Collect error details for popup
+
             err_details = "\n".join(
                 f"• {name}: {err}"
                 for name, _, _, _, ok, err in results if not ok
@@ -1316,12 +1311,12 @@ class PDFCompressorApp(_RootBase):
                 f"❌  {fail_n} file(s) failed\n\n"
                 f"Output folder:\n{self.output_dir}")
 
-        # Reset progress bar color after a delay
+
         self.after(3000, lambda: self.progress_bar.configure(
             progress_color=C["accent"]))
 
 
-# ── Entry Point ──────────────────────────────────────────────────────
+
 if __name__ == "__main__":
     app = PDFCompressorApp()
     app.mainloop()

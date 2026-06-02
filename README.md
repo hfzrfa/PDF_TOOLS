@@ -2,6 +2,10 @@
 
 PDF Tools is a Windows-friendly desktop utility for common PDF workflows. It provides PDF compression, document conversion, table extraction, and image-to-PDF merging in a single CustomTkinter interface.
 
+## Preview
+
+![PDF Tools application preview](image.png)
+
 ## Features
 
 - Compress PDF files with multiple compression levels.
@@ -80,6 +84,7 @@ dist/PDF Compressor.exe
 |-- requirements.txt        # Python dependencies
 |-- PDF Compressor.spec     # PyInstaller build configuration
 |-- install_and_run.bat     # Windows setup and launch helper
+|-- image.png               # Application preview image
 `-- README.md
 ```
 
